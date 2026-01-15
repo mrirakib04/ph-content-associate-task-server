@@ -47,6 +47,25 @@ async function run() {
     const database = client.db(process.env.DB_NAME);
     const usersCollection = database.collection("users");
     const newsCollection = database.collection("news");
+    const districtsCollection = database.collection("districts");
+
+    // Get all news with optional category filter
+    app.get("/news", async (req, res) => {
+      try {
+        const { category } = req.query;
+        let query = {};
+        if (category && category !== "all") {
+          query.category = { $regex: category, $options: "i" };
+        }
+        const result = await newsCollection
+          .find(query)
+          .sort({ date: -1 })
+          .toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Error fetching news" });
+      }
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
