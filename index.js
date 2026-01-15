@@ -105,6 +105,21 @@ async function run() {
         res.status(500).send({ message: "Error fetching category news" });
       }
     });
+    // Get single news details by ID
+    app.get("/news-details/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+
+        // Increment popularity count by 1 every time details are viewed
+        await newsCollection.updateOne(query, { $inc: { popularity: 1 } });
+
+        const result = await newsCollection.findOne(query);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Error fetching news details" });
+      }
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
