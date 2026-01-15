@@ -49,19 +49,29 @@ async function run() {
     const newsCollection = database.collection("news");
     const districtsCollection = database.collection("districts");
 
-    // Get all news with optional category filter
     app.get("/news", async (req, res) => {
       try {
-        const { category } = req.query;
+        const { category, page = 1, limit = 9 } = req.query;
+        const pageNumber = parseInt(page);
+        const limitNumber = parseInt(limit);
+
         let query = {};
         if (category && category !== "all") {
           query.category = { $regex: category, $options: "i" };
         }
+
+        const totalCount = await newsCollection.countDocuments(query);
         const result = await newsCollection
           .find(query)
           .sort({ date: -1 })
+          .skip((pageNumber - 1) * limitNumber)
+          .limit(limitNumber)
           .toArray();
-        res.send(result);
+
+        res.send({
+          data: result,
+          totalCount,
+        });
       } catch (error) {
         res.status(500).send({ message: "Error fetching news" });
       }
