@@ -66,6 +66,35 @@ async function run() {
         res.status(500).send({ message: "Error fetching news" });
       }
     });
+    // Get category news (Pagination & Sorting)
+    app.get("/category-news/:category", async (req, res) => {
+      try {
+        const category = req.params.category;
+        const { sort, page = 1, limit = 9 } = req.query;
+
+        let query = { category: { $regex: category, $options: "i" } };
+
+        let sortQuery = { date: -1 };
+        if (sort === "popularity") {
+          sortQuery = { popularity: -1 };
+        }
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const result = await newsCollection
+          .find(query)
+          .sort(sortQuery)
+          .skip(skip)
+          .limit(parseInt(limit))
+          .toArray();
+
+        const total = await newsCollection.countDocuments(query);
+
+        res.send({ result, total });
+      } catch (error) {
+        res.status(500).send({ message: "Error fetching category news" });
+      }
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
