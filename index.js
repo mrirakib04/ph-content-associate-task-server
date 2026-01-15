@@ -120,6 +120,16 @@ async function run() {
         res.status(500).send({ message: "Error fetching news details" });
       }
     });
+
+    // Get all districts for the dropdown
+    app.get("/districts", async (req, res) => {
+      try {
+        const result = await districtsCollection.find().toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Error fetching districts" });
+      }
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
