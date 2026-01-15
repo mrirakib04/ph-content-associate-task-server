@@ -120,7 +120,6 @@ async function run() {
         res.status(500).send({ message: "Error fetching news details" });
       }
     });
-
     // Get all districts for the dropdown
     app.get("/districts", async (req, res) => {
       try {
@@ -128,6 +127,23 @@ async function run() {
         res.send(result);
       } catch (error) {
         res.status(500).send({ message: "Error fetching districts" });
+      }
+    });
+    // Get news by district
+    app.get("/district-news", async (req, res) => {
+      try {
+        const { district } = req.query;
+        let query = {};
+        if (district) {
+          query.district = { $regex: district, $options: "i" };
+        }
+        const result = await newsCollection
+          .find(query)
+          .sort({ date: -1 })
+          .toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Error fetching district news" });
       }
     });
   } finally {
