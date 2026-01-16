@@ -146,6 +146,19 @@ async function run() {
         res.status(500).send({ message: "Error fetching district news" });
       }
     });
+    // Get latest 10 news for Breaking News Marquee
+    app.get("/breaking-news", async (req, res) => {
+      try {
+        const result = await newsCollection
+          .find({}, { projection: { title: 1, _id: 1, category: 1 } }) // Shudhu title ebong ID nibe
+          .sort({ date: -1 }) // Latest gulo age ashbe
+          .limit(10) // Top 10 news
+          .toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Error fetching breaking news" });
+      }
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
